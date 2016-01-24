@@ -233,7 +233,6 @@ public class PhoneFactory {
                 // because ImsService might need it when it is being opened.
                 for (int i = 0; i < numPhones; i++) {
                     sProxyPhones[i].startMonitoringImsService();
-
                     // Get users NW type, let it override if its not the default NW mode (-1)
                     int userNwType = SubscriptionController.getInstance().getUserNwMode(
                             sProxyPhones[i].getSubId());
@@ -378,6 +377,14 @@ public class PhoneFactory {
             networkType = android.provider.Settings.Global.getInt(context.getContentResolver(),
                     android.provider.Settings.Global.PREFERRED_NETWORK_MODE + phoneSubId,
                     phoneIdNetworkType);
+
+            // Get users NW type, let it override if its not the default NW mode (-1)
+            int userNwType = SubscriptionController.getInstance().getUserNwMode(phoneSubId);
+            if (userNwType != SubscriptionManager.DEFAULT_NW_MODE && userNwType != networkType) {
+                Rlog.d(LOG_TAG, "calculatePreferredNetworkType: overriding for usernw mode " +
+                        "phoneSubId = " + phoneSubId + " networkType = " + networkType);
+                networkType = userNwType;
+            }
         } else {
             Rlog.d(LOG_TAG, "calculatePreferredNetworkType: phoneSubId = " + phoneSubId +
                     " is not a active SubId");
@@ -594,5 +601,9 @@ public class PhoneFactory {
             }
             ipw.flush();
         }
+    }
+
+    public static SubscriptionInfoUpdater getSubscriptionInfoUpdater() {
+        return sSubInfoRecordUpdater;
     }
 }

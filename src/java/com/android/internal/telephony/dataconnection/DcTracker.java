@@ -793,9 +793,8 @@ public class DcTracker extends DcTrackerBase {
         boolean allowed =
                     (attachedState || (mAutoAttachOnCreation.get() &&
                             (mPhone.getSubId() == dataSub))) &&
-                    recordsLoaded &&
-                    (state == PhoneConstants.State.IDLE ||
                     (subscriptionFromNv || recordsLoaded) &&
+                    (state == PhoneConstants.State.IDLE ||
                      mPhone.getServiceStateTracker().isConcurrentVoiceAndDataAllowed()) &&
                     internalDataEnabled &&
                     defaultDataSelected &&
@@ -2366,7 +2365,7 @@ public class DcTracker extends DcTrackerBase {
     }
 
     private boolean isNvSubscription() {
-        int radioTech = mPhone.getServiceState().getRilDataRadioTechnology();
+        int radioTech = mPhone.getServiceState().getRilVoiceRadioTechnology();
         if (mCdmaSsm == null) {
             return false;
         }
