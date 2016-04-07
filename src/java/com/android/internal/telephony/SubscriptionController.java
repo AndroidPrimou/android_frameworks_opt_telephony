@@ -775,6 +775,19 @@ public class SubscriptionController extends ISub.Stub {
                                 setDefaultSmsSubId(subId);
                                 setDefaultVoiceSubId(subId);
                             }
+
+                            // FIXME: Workaround the scenario where default sms subid is not
+                            // being set externally
+                            // CYNGNOS-2185
+                            int phoneId = SubscriptionController.getInstance().getPhoneId(
+                                    getDefaultSmsSubId());
+                            if (phoneId < 0 || phoneId >= TelephonyManager.getDefault()
+                                    .getPhoneCount()) {
+                                Rlog.i(LOG_TAG, "Subscription is invalid. Set default to " + subId);
+                                setDefaultSmsSubId(subId);
+                                PhoneFactory.setSMSPromptEnabled(subIdCountMax > 1);
+                            }
+
                         } else {
                             if (DBG) {
                                 logdl("[addSubInfoRecord] currentSubId != null"
@@ -822,6 +835,10 @@ public class SubscriptionController extends ISub.Stub {
             updateAllDataConnectionTrackers();
 
             if (DBG) logdl("[addSubInfoRecord]- info size=" + sSlotIdxToSubId.size());
+
+            if (sSlotIdxToSubId.size() <= 1) {
+                PhoneFactory.setSMSPromptEnabled(false);
+            }
 
         } finally {
             Binder.restoreCallingIdentity(identity);
